@@ -295,9 +295,6 @@ start, end = 0, binsize
 for i in binnate(length_list, binsize):
     print("{}-{}\t{}".format(start, end, len(i)))
     start, end = end, end + binsize
-binfile = open("bin.txt", "w")
-binfile.write(str(length_list))
-binfile.close()
 print("Total codon content:")
 for k, v in codon_counter.items():
     print(bitcodon[k], v, sep="\t")
