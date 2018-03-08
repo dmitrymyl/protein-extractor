@@ -10,7 +10,7 @@ log_file = open("log.txt", "w")
 
 def log_wrapper(name, file):
     """
-    Writes in given file time of calling the specified function.
+    Writes time of calling the specified function in given file.
     """
     def decorator(func):
         @wraps(func)
@@ -110,19 +110,16 @@ def revcompl(value1, length):
 
 
 @log_wrapper("binnate", log_file)
-def binnate(input_list, binsize):
+def binnate(input_iterable, binsize):
     """
-    Returns generator with bins as lists.
+    v1.2. Returns generator with bins as lists.
     """
-    sorted(input_list)
-    buff = []
-    cur_bin = 0
+    input_list = sorted(input_iterable)
     bound = binsize
     for value in input_list:
         while value >= bound:
             yield buff
             buff.clear()
-            cur_bin += 1
             bound += binsize
         buff.append(value)
     yield buff
@@ -221,9 +218,7 @@ triplet = 0
 length_list = []
 protein_amount = 0
 while base is not None:  # Not EOF
-    if base is None:  # EOF. Is it really heeded here?
-        pass
-    elif base < 4:  # Base is a regular one
+    if base < 4:  # Base is a regular one
         triplet &= 15
         triplet <<= 2
         triplet += base
@@ -235,13 +230,14 @@ while base is not None:  # Not EOF
         seed_size = 0
         triplet = 0
         cur_pos += 1
-        handler[cur_orf].clear()
-        handler[cur_orf + 3].clear()
+        for i in handler:
+            i.clear()
         cur_orf = next(orf)
-    else:  # Got newline
-        pass
-    if triplet_size >= 3:  # If codon is ready
-        # Check forward string
+    else:  # Got newline.
+        base = char2bit(fasta.read(1))
+        continue
+    if triplet_size >= 3:  # If codon is ready.
+        # Check forward string.
         if table_forward[triplet] == 'M':  # Start codon: start a new seq.
             handler[cur_orf].append([cur_pos - 2, deque()])
             for protein in handler[cur_orf]:
@@ -257,15 +253,15 @@ while base is not None:  # Not EOF
                     protseq = list()
                     length_list.append(len(buff[1]))
                     while buff[1]:
-                        protseq.append(table_forward[buff[1].popleft()])  # Like queue
+                        protseq.append(table_forward[buff[1].popleft()])  # Like queue.
                     fasta_writer(protseq, protein_file, start=buff[0],
                                  end=buff[2], number=protein_amount)
                     counter_writer(Counter(protseq), aa_file,
                                    number=protein_amount)
-        else:  # Any other codon
+        else:  # Any other codon.
             for protein in handler[cur_orf]:
                 protein[1].append(triplet)
-        # Check reverse string
+        # Check reverse string.
         rev_triplet = revcompl(triplet, 3)
         if table_reverse[rev_triplet] == 'M':  # Start codon: terminate seq.
             for protein in handler[cur_orf + 3]:
@@ -288,7 +284,7 @@ while base is not None:  # Not EOF
         elif table_reverse[rev_triplet] == 0:  # Stop codon: start a new seq.
             handler[cur_orf + 3].clear()
             handler[cur_orf + 3].append([cur_pos - 2, deque()])
-        else:  # Any other codon: append
+        else:  # Any other codon: append.
             for protein in handler[cur_orf + 3]:
                 protein[1].append(rev_triplet)
     base = char2bit(fasta.read(1))
@@ -299,6 +295,9 @@ start, end = 0, binsize
 for i in binnate(length_list, binsize):
     print("{}-{}\t{}".format(start, end, len(i)))
     start, end = end, end + binsize
+binfile = open("bin.txt", "w")
+binfile.write(str(length_list))
+binfile.close()
 print("Total codon content:")
 for k, v in codon_counter.items():
     print(bitcodon[k], v, sep="\t")
