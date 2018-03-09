@@ -100,7 +100,7 @@ def revcompl(value1, length):
     in bit format.
     """
     value2 = 0
-    value1 = ~value1 & 63
+    value1 = ~value1 & 63  # 0b111111
     for _ in range(length):
         buff = value1 & 3
         value2 <<= 2
@@ -219,7 +219,7 @@ length_list = []
 protein_amount = 0
 while base is not None:  # Not EOF
     if base < 4:  # Base is a regular one
-        triplet &= 15
+        triplet &= 15  # 0b1111
         triplet <<= 2
         triplet += base
         nucl_counter[base] += 1
