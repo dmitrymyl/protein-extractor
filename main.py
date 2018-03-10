@@ -291,10 +291,10 @@ while base is not None:  # Not EOF
 # Do output.
 print("Found {} proteins".format(protein_amount))
 print("Length distribution across proteins:")
-start, end = 0, binsize
+start, end = 1, binsize
 for i in binnate(length_list, binsize):
     print("{}-{}\t{}".format(start, end, len(i)))
-    start, end = end, end + binsize
+    start, end = end + 1, end + binsize
 print("Total codon content:")
 for k, v in codon_counter.items():
     print(bitcodon[k], v, sep="\t")
