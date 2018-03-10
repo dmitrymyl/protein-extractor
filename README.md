@@ -7,11 +7,13 @@ File | Description
 `main.py` | The main file with working program.
 `tables.py` | Sample genetic tables in format of python dictionaries.
 `table_generators.py` | The program that generates tables in tables.py
+`random_n_gen.py` | The program that modifies given fasta sequence. Insert N in random places with an average defined by user (some integer out of 10000 input bases).
 `ecoli.fasta` | Sample bacterium genome.
+`garbage.fasta` | Sample bacterium genome modified with `random_n_gen.py`.
 `proteins.png` | An image for README.md
 `deque.png` | An image for README.md
 
-## main.py
+## Main program
 The program takes only one file in `.fasta` format with only one record in it. It takes into account the reverse strand and unknown nucleotides as N. 
 ### Qualifiers
 Qualifier | type | Description
