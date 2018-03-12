@@ -30,7 +30,7 @@ def argv_parser(argv_list, qualifiers):
     """
     Parses CLI argument line. If no qualifiers specified, prints
     description and table of qualifiers. If not empty, checks whether
-    all requiered and no unknown qualifiers are specified with correct values.
+    all required and no unknown qualifiers are specified with correct values.
     """
     if len(argv_list) < 2:
         print("The program extracts all possible protein sequences "
@@ -54,18 +54,12 @@ def argv_parser(argv_list, qualifiers):
                 print("Died:")
                 print("Unknown qualifier: {}".format(i))
                 exit(1)
-        try:
-            qualifiers["-binsize"] = int(qualifiers["-binsize"])
-        except ValueError:
-            print("Died:")
-            print("-binsize must be an integer value.")
-            exit(1)
-        try:
-            qualifiers["-minlen"] = int(qualifiers["-minlen"])
-        except ValueError:
-            print("Died:")
-            print("-minlen must be an integer value.")
-            exit(1)
+        for qual in ("-binsize", "-minlen"):
+            try:
+                qualifiers[qual] = int(qualifiers[qual])
+            except ValueError:
+                print("Died:\n{} must be an integer value.".format(qual))
+                exit(1)
 
 
 # @log_wrapper("char2bit", log_file)
@@ -73,8 +67,8 @@ def argv_parser(argv_list, qualifiers):
 def char2bit(nucl):
     """
     Returns a bit value of any base according to
-    given dictionary. Process unknown nucleotide
-    and empty string.
+    given dictionary. Process unknown nucleotide,
+    empty string and newline character.
     """
     dictmap = {'A': 0, 'a': 0, 'T': 3, 't': 3, 'G': 1, 'g': 1,
                'C': 2, 'c': 2, '': None, "N": 4, 'n': 4, '\n': 5}
@@ -126,27 +120,27 @@ def binnate(input_iterable, binsize):
 
 
 @log_wrapper("fasta_writer", log_file)
-def fasta_writer(seqiter, file, start='', end='', number='', reverse=False):
+def fasta_writer(seqiter, file, start='', end='', ident='', reverse=False):
     """
     Writes any sequence in seqiter into file in fasta format.
     Optional arguments are coordinates in GenBank notation and
-    number of sequence.
+    ID of sequence.
     """
     rev = ''
     if reverse:
         rev = "(reverse)"
-    file.write(">{}_{}..{}{}\n".format(number, start, end, rev))
+    file.write(">{}_{}..{}{}\n".format(ident, start, end, rev))
     for i in range(0, len(seqiter), 60):
         file.write("{}\n".format(''.join(seqiter[i:i + 59])))
 
 
 @log_wrapper("counter_writer", log_file)
-def counter_writer(counter, file, number=''):
+def counter_writer(counter, file, ident=''):
     """
     Writes any counter in file in fasta format.
-    Optional argument is number of counter.
+    Optional argument is ID of corresponding sequence.
     """
-    file.write(">{}\n".format(number))
+    file.write(">{}\n".format(ident))
     for k, v in counter.items():
         file.write("{}\t{}\n".format(k, v))
 
@@ -209,13 +203,13 @@ title = fasta.readline()
 print("Parsing {}".format(title[1:].strip()))
 orf = cycle([0, 1, 2])
 base = 5  # Like a newline.
-cur_pos = 0
-cur_orf = 0
+cur_pos = 0  # The current position in genome is 0, before the start.
+cur_orf = 0  # The current ORF is supposed to be 0.
 triplet_size = 0
 nucl_counter = {0: 0, 1: 0, 2: 0, 3: 0}
 handler = [[] for _ in range(6)]  # A structure for all growing proteins in six RFs.
 triplet = 0
-length_list = []
+length_list = []  # The list containing all proteins' lengths.
 protein_amount = 0
 while base is not None:  # Not EOF
     if base < 4:  # Base is a regular one
